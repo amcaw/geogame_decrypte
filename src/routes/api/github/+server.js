@@ -2,6 +2,16 @@ import { json } from '@sveltejs/kit';
 import axios from 'axios';
 
 export async function POST({ request }) {
+        const headers = {
+        'Access-Control-Allow-Origin': 'https://geogame.gdd.rtbf.be/', // Be more specific in production
+        'Access-Control-Allow-Methods': 'POST,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    };
+
+    // Handle preflight requests
+    if (request.method === 'OPTIONS') {
+        return new Response(null, { headers });
+    }
     const { filePath, header, content } = await request.json();
     const GITHUB_REPO = process.env.VITE_GITHUB_REPO;
     const GITHUB_TOKEN = process.env.VITE_GITHUB_TOKEN;
