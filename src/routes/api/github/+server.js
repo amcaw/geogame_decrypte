@@ -13,6 +13,8 @@ export async function POST({ request }) {
 
     const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${filePath}`;
 
+    console.log('Attempting to access URL:', url);
+
     try {
         let response;
         try {
@@ -25,14 +27,15 @@ export async function POST({ request }) {
         } catch (error) {
             if (error.response && error.response.status === 404) {
                 // File doesn't exist, we'll create it
+                console.log('File not found, will create:', filePath);
                 response = { data: {} };
             } else {
+                console.error('Error fetching GitHub file:', error.response ? error.response.data : error.message);
                 throw error;
             }
         }
 
         const { data } = response;
-
         let newContent, encodedContent, message;
 
         if (data.content) {
@@ -57,9 +60,10 @@ export async function POST({ request }) {
             }
         });
 
+        console.log('File successfully updated:', filePath);
         return json({ success: true });
     } catch (error) {
-        console.error('Error updating GitHub file:', error);
+        console.error('Error updating GitHub file:', error.response ? error.response.data : error.message);
         return json({ success: false, error: error.message }, { status: 500 });
     }
 }
