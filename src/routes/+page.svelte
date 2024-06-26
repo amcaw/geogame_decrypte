@@ -79,7 +79,7 @@
 
   async function appendToFile(filePath, header, content) {
     try {
-      const response = await fetch('/api/github', {
+      const response = await fetch('/api/github.com', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
