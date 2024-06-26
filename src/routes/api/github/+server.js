@@ -2,16 +2,6 @@ import { json } from '@sveltejs/kit';
 import axios from 'axios';
 
 export async function POST({ request }) {
-        const headers = {
-        'Access-Control-Allow-Origin': 'https://geogame.gdd.rtbf.be/', // Be more specific in production
-        'Access-Control-Allow-Methods': 'POST,OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-    };
-
-    // Handle preflight requests
-    if (request.method === 'OPTIONS') {
-        return new Response(null, { headers });
-    }
     const { filePath, header, content } = await request.json();
     const GITHUB_REPO = process.env.VITE_GITHUB_REPO;
     const GITHUB_TOKEN = process.env.VITE_GITHUB_TOKEN;
@@ -22,8 +12,6 @@ export async function POST({ request }) {
     }
 
     const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${filePath}`;
-
-    console.log('Attempting to access URL:', url);
 
     try {
         let response;
@@ -37,15 +25,14 @@ export async function POST({ request }) {
         } catch (error) {
             if (error.response && error.response.status === 404) {
                 // File doesn't exist, we'll create it
-                console.log('File not found, will create:', filePath);
                 response = { data: {} };
             } else {
-                console.error('Error fetching GitHub file:', error.response ? error.response.data : error.message);
                 throw error;
             }
         }
 
         const { data } = response;
+
         let newContent, encodedContent, message;
 
         if (data.content) {
@@ -70,10 +57,9 @@ export async function POST({ request }) {
             }
         });
 
-        console.log('File successfully updated:', filePath);
         return json({ success: true });
     } catch (error) {
-        console.error('Error updating GitHub file:', error.response ? error.response.data : error.message);
+        console.error('Error updating GitHub file:', error);
         return json({ success: false, error: error.message }, { status: 500 });
     }
 }
